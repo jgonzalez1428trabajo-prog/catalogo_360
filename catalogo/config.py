@@ -3,18 +3,30 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
+# Ruta local del archivo SQLite que usa la aplicación.
 DB_PATH = Path("catalogo.db")
+# Archivo SQL que define todas las tablas/constraints.
 SCHEMA_PATH = Path("schema.sql")
 
 
 @dataclass(frozen=True)
 class EntityConfig:
+    """Configuración declarativa de cada opción del catálogo.
+
+    Atributos:
+        table: nombre físico de tabla en SQLite.
+        pk: llave primaria surrogate (autoincremental).
+        fields: mapeo (label_formulario, columna_bd).
+        natural_key: columnas de negocio usadas para evitar duplicados.
+    """
+
     table: str
     pk: str
     fields: list[tuple[str, str]]
     natural_key: list[str]
 
 
+# Diccionario central de opciones: controla qué campos se renderizan y a qué tabla se guardan.
 CONFIGS: dict[str, EntityConfig] = {
     "Diccionarios": EntityConfig(
         table="dic_diccionarios",

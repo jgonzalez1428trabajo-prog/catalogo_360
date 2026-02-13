@@ -15,11 +15,14 @@ from .db import (
 )
 
 
+# Controlador reactivo principal: coordina eventos UI y operaciones de base de datos.
 def server(input, output, session):
+    # Mensaje de estado para mostrar feedback al usuario.
     message = reactive.value("Base inicializada. Selecciona una opción.")
 
     @reactive.effect
     def _sync_schema_choices() -> None:
+        # Mantiene actualizado el combo de tablas disponibles para inspección.
         names = [r["name"] for r in list_tables()]
         selected = input.schema_table() if input.schema_table() in names else (names[0] if names else None)
         ui.update_select("schema_table", choices=names, selected=selected)
@@ -27,16 +30,19 @@ def server(input, output, session):
     @output
     @render.ui
     def dynamic_form():
+        # Renderiza inputs dinámicos según la opción elegida.
         conf = CONFIGS[input.opcion()]
         widgets = [ui.input_text(f"f_{col}", label) for label, col in conf.fields]
         return ui.TagList(*widgets)
 
+    # Extrae valores actuales del formulario y los normaliza (strip).
     def collect_values(conf: EntityConfig) -> dict[str, str]:
         return {col: (input[f"f_{col}"]() or "").strip() for _, col in conf.fields}
 
     @reactive.effect
     @reactive.event(input.btn_upsert)
     def _upsert():
+        # Guarda por llave natural: inserta si no existe, actualiza si existe.
         conf = CONFIGS[input.opcion()]
         values = collect_values(conf)
         if any(not values.get(col, "") for col in conf.natural_key):
@@ -48,6 +54,7 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.btn_load)
     def _load():
+        # Carga un registro por ID para editarlo en formulario.
         if input.row_id() is None:
             message.set("Indica un ID para cargar.")
             return
@@ -63,6 +70,7 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.btn_update)
     def _update():
+        # Actualiza un registro por ID validando colisión de llave natural.
         if input.row_id() is None:
             message.set("Indica un ID para editar.")
             return
@@ -87,6 +95,7 @@ def server(input, output, session):
     @reactive.effect
     @reactive.event(input.btn_delete)
     def _delete():
+        # Borra un registro por ID interno.
         if input.row_id() is None:
             message.set("Indica un ID para eliminar.")
             return
@@ -106,17 +115,20 @@ def server(input, output, session):
     @output
     @render.table
     def data_table():
+        # Tabla principal: muestra datos de la entidad seleccionada.
         conf = CONFIGS[input.opcion()]
         return [dict(r) for r in fetch_table(conf)]
 
     @output
     @render.table
     def tables_table():
+        # Lista todas las tablas disponibles en SQLite.
         return [dict(r) for r in list_tables()]
 
     @output
     @render.table
     def schema_table_view():
+        # Muestra la estructura de la tabla elegida en el selector.
         table_name = input.schema_table()
         if not table_name:
             return []
