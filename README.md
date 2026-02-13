@@ -1,19 +1,25 @@
 # Catálogo 360 - Shiny + SQLite
 
-Aplicación en **Python con Shiny** para gestionar estructuras con operaciones CRUD:
+Aplicación en **Python con Shiny** con formulario dinámico por opción del catálogo.
 
-- Agregar registros
-- Editar registros
-- Eliminar registros
-- Validar duplicados por `codigo`
-- Consultar la estructura de la base SQLite y filtrar por ubicación
+## Qué hace
 
-## Requisitos
+- Cambias la opción (`Diccionarios`, `Tablas Input`, `Módulos`, `Artefactos`, `Vistas`, `Historia`, `Reglas Historia`, `Variables (General)`, `Variaciones de Variables`).
+- La app renderiza **solo los campos de esa entidad**.
+- Guarda en su tabla correspondiente en SQLite.
+- Usa **UPSERT por llave natural** para evitar duplicados de negocio.
+- Permite cargar/editar/eliminar por ID interno (PK surrogate).
+- Incluye vista para consultar tablas y estructura (`PRAGMA table_info`).
 
-- Python 3.10+
-- Dependencias de `requirements.txt`
+## Estructura de BD
 
-## Ejecución
+- El archivo `schema.sql` crea todas las tablas y constraints.
+- `catalogo.db` se crea automáticamente al iniciar la app.
+- Se aplica patrón recomendado:
+  - PK numérica autogenerada (surrogate key)
+  - `UNIQUE` por llave natural de negocio.
+
+## Ejecutar
 
 ```bash
 python -m venv .venv
@@ -22,15 +28,8 @@ pip install -r requirements.txt
 shiny run --reload app.py
 ```
 
-La app crea automáticamente la base `catalogo.db` con la tabla `estructuras`.
+## Notas de modelado
 
-## Estructura de tabla principal
-
-`estructuras`
-
-- `id` (PK autoincremental)
-- `codigo` (único)
-- `nombre`
-- `ubicacion`
-- `descripcion`
-- `estado`
+- Se omitieron columnas `Unnamed:*` de Excel para mantener un modelo limpio.
+- Se conservaron nombres funcionales de columnas para mapear los formularios solicitados.
+- Para cargas masivas puedes reutilizar la misma lógica de UPSERT por llave natural.
