@@ -2,6 +2,21 @@
 
 Aplicación en **Python con Shiny** con formulario dinámico por opción del catálogo.
 
+## Estructura de archivos
+
+```text
+.
+├── app.py
+├── schema.sql
+├── requirements.txt
+└── catalogo/
+    ├── __init__.py
+    ├── config.py    # Configuración de entidades y mapeos formulario->columna
+    ├── db.py        # Conexión SQLite + CRUD/UPSERT
+    ├── server.py    # Lógica reactiva de Shiny
+    └── ui.py        # Definición de interfaz
+```
+
 ## Qué hace
 
 - Cambias la opción (`Diccionarios`, `Tablas Input`, `Módulos`, `Artefactos`, `Vistas`, `Historia`, `Reglas Historia`, `Variables (General)`, `Variaciones de Variables`).
